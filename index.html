@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>PhysicsFlow — Momentum &amp; Impulse Explorer</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#0f2044;--navy-mid:#1a3360;--navy-light:#243d73;
+  --teal:#1d9e75;--teal-light:#5dcaa5;--teal-pale:#e1f5ee;
+  --amber:#ef9f27;--amber-light:#fac775;--amber-pale:#faeeda;
+  --white:#fff;--off:#f6f9fc;
+  --gl:#e4eaf4;--gm:#c4ccda;--gd:#7a8499;
+  --ink:#0f2044;--mid:#3a4a6b;--muted:#7a8499;
+  --red:#e24b4a;--red-p:#fcebeb;
+  --blue:#378add;--blue-p:#e6f1fb;
+  --green:#15803d;--green-p:#e8f8ef;
+  --purple:#6d28d9;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',Arial,sans-serif;background:var(--navy);color:var(--ink);min-height:100vh;}
+header{background:linear-gradient(135deg,var(--navy) 0%,var(--navy-mid) 60%,var(--navy-light) 100%);padding:18px 24px 0;border-bottom:4px solid var(--teal);}
+.brand{max-width:1180px;margin:0 auto;display:flex;align-items:center;gap:16px;margin-bottom:14px;}
+.pf-logo{width:58px;height:58px;border-radius:12px;background:var(--white);display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 6px 18px rgba(0,0,0,.25);}
+.pf-logo-inner{font-family:'Space Mono',monospace;font-size:20px;font-weight:700;color:var(--navy);letter-spacing:-2px;}
+.pf-logo-inner span{color:var(--teal);}
+.brand-text h1{font-size:clamp(18px,3vw,34px);font-weight:700;color:var(--white);line-height:1.1;}
+.brand-text h1 em{font-style:normal;color:var(--amber);}
+.brand-text p{font-size:13px;color:#b8d4f0;font-weight:500;margin-top:4px;}
+.tab-bar{max-width:1180px;margin:0 auto;display:flex;gap:2px;flex-wrap:wrap;}
+.tab-btn{border:none;background:transparent;color:var(--gm);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;padding:9px 15px;cursor:pointer;border-bottom:3px solid transparent;transition:color .15s,border-color .15s;white-space:nowrap;position:relative;top:2px;}
+.tab-btn:hover{color:var(--teal-light);}
+.tab-btn.active{color:var(--amber);border-bottom-color:var(--amber);}
+.main-wrap{background:var(--off);min-height:calc(100vh - 110px);}
+.topbar{max-width:1180px;margin:0 auto;padding:14px 18px 0;display:flex;justify-content:flex-end;}
+.print-btn{border:none;background:var(--teal);color:#fff;border-radius:10px;padding:8px 15px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:13px;cursor:pointer;}
+.print-btn:hover{background:#0f6e56;}
+.panel{display:none;max-width:1180px;margin:0 auto;padding:24px 18px 18px;}
+.panel.active{display:block;}
+.grid{display:grid;grid-template-columns:minmax(270px,390px) 1fr;gap:16px;align-items:start;}
+@media(max-width:840px){.grid{grid-template-columns:1fr;}}
+.ctrl,.vis,.qcard{background:var(--white);border:1.5px solid var(--gl);border-radius:16px;padding:16px;box-shadow:0 3px 12px rgba(15,32,68,.07);}
+.sec-title{font-family:'Space Mono',monospace;font-size:14px;font-weight:700;color:var(--navy);margin-bottom:9px;display:flex;align-items:center;gap:8px;}
+.sec-title .num{background:var(--navy);color:var(--amber);font-size:10px;padding:3px 7px;border-radius:5px;}
+.formula{font-family:'Space Mono',monospace;font-size:16px;font-weight:700;color:var(--amber);background:var(--navy);border-radius:9px;padding:9px 13px;margin:10px 0;text-align:center;}
+.pill-row{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:9px;}
+.pill{background:var(--teal-pale);border:1.5px solid #9fe1cb;border-radius:999px;color:#0f6e56;font-weight:700;font-size:11px;padding:3px 9px;font-family:'Space Mono',monospace;}
+.sl-label{display:flex;justify-content:space-between;font-weight:600;font-size:13px;color:var(--mid);margin:11px 0 3px;}
+.sl-label span{font-family:'Space Mono',monospace;font-weight:700;color:var(--navy);}
+input[type=range]{width:100%;accent-color:var(--teal);cursor:pointer;}
+select{width:100%;padding:8px 11px;border-radius:9px;border:1.5px solid var(--gl);font-family:'DM Sans',sans-serif;font-weight:600;font-size:13px;color:var(--ink);background:var(--white);margin-top:3px;cursor:pointer;}
+.readout{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:12px;}
+.metric{background:var(--off);border:1px solid var(--gl);border-radius:9px;padding:9px 11px;}
+.metric small{display:block;font-size:10px;font-weight:700;color:var(--muted);margin-bottom:2px;text-transform:uppercase;letter-spacing:.4px;}
+.metric strong{font-family:'Space Mono',monospace;font-size:16px;font-weight:700;color:var(--navy);}
+.metric.t strong{color:var(--teal);}
+.metric.a strong{color:#854f0b;}
+.metric.r strong{color:var(--red);}
+.fb{border-radius:9px;padding:9px 13px;margin-top:9px;font-weight:600;font-size:13px;line-height:1.5;}
+.fi{background:var(--blue-p);color:#12356f;border:1.5px solid #b5d4f4;}
+.fg{background:var(--green-p);color:#14532d;border:1.5px solid #b8e7c8;}
+.fr{background:var(--red-p);color:#991b1b;border:1.5px solid #f7c1c1;}
+canvas{width:100%;background:var(--white);border:1.5px solid var(--gl);border-radius:12px;display:block;}
+.key-idea{margin-top:10px;font-size:13px;line-height:1.6;color:var(--mid);padding:9px 13px;background:var(--off);border-left:4px solid var(--teal);border-radius:0 8px 8px 0;}
+.key-idea b{color:var(--navy);}
+.sim-btn{padding:8px 18px;border:none;border-radius:9px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:13px;cursor:pointer;transition:background .15s;}
+.sim-btn.go{background:var(--teal);color:#fff;}
+.sim-btn.go:hover{background:#0f6e56;}
+.sim-btn.reset{background:var(--gl);color:var(--navy);}
+.sim-btn.reset:hover{background:var(--gm);}
+.btn-row{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;}
+.challenge-box{background:var(--navy);border-radius:12px;padding:14px 16px;margin-bottom:12px;}
+.challenge-box p{font-size:14px;font-weight:600;color:var(--white);margin-bottom:10px;line-height:1.5;}
+.challenge-box ol{color:var(--gm);font-size:13px;padding-left:18px;line-height:2;}
+.pred-opts{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;}
+.pred-opt{padding:7px 14px;border:1.5px solid var(--navy-light);border-radius:8px;background:transparent;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;color:var(--gm);cursor:pointer;transition:all .15s;}
+.pred-opt:hover{border-color:var(--amber);color:var(--amber);}
+.pred-opt.correct{background:var(--teal);color:#fff;border-color:var(--teal);}
+.pred-opt.wrong{background:var(--red);color:#fff;border-color:var(--red);}
+.pred-reveal{font-size:13px;color:var(--teal-light);margin-top:8px;display:none;line-height:1.5;}
+.pred-reveal.show{display:block;}
+.question{border:1.5px solid var(--gl);background:var(--white);border-radius:13px;padding:13px 15px;margin:10px 0;}
+.question p{margin:0 0 9px;font-weight:700;font-size:14px;color:var(--navy);line-height:1.5;}
+.q-num{font-family:'Space Mono',monospace;font-size:10px;color:var(--teal);display:block;margin-bottom:5px;text-transform:uppercase;letter-spacing:1px;}
+.question button{display:block;width:100%;text-align:left;margin:4px 0;padding:8px 13px;border:1.5px solid var(--gl);border-radius:8px;background:var(--white);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;color:var(--ink);cursor:pointer;transition:border-color .15s,color .15s;}
+.question button:hover:not(:disabled){border-color:var(--teal);color:var(--teal);}
+.question button.correct{background:var(--teal-pale);border-color:var(--teal);color:#0f6e56;}
+.question button.wrong{background:var(--red-p);border-color:var(--red);color:var(--red);}
+.calc-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:8px;}
+.calc-row input[type=text]{border:1.5px solid var(--gl);border-radius:8px;padding:7px 11px;font-family:'Space Mono',monospace;font-size:14px;color:var(--ink);width:120px;outline:none;}
+.calc-row input[type=text]:focus{border-color:var(--teal);}
+.chk-btn{padding:7px 16px;background:var(--navy);color:var(--amber);border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;cursor:pointer;}
+.score-wrap{background:var(--navy);border-radius:13px;padding:18px;text-align:center;margin-top:14px;display:none;}
+.score-wrap.show{display:block;}
+.score-big{font-family:'Space Mono',monospace;font-size:42px;font-weight:700;color:var(--amber);}
+.score-sub{font-size:13px;color:var(--gm);margin-top:5px;}
+footer{text-align:center;padding:14px;font-size:12px;color:var(--gd);background:var(--navy);font-weight:600;letter-spacing:.4px;}
+@media print{header .tab-bar,header,footer,.topbar{display:none;}.main-wrap{background:#fff;}.panel{display:block!important;page-break-after:always;}body{background:#fff;}}
+
+/* ── PASSWORD LOCK ── */
+#pf-lock{position:fixed;inset:0;z-index:9999;background:linear-gradient(135deg,#0f2044 0%,#1a3360 60%,#243d73 100%);display:flex;align-items:center;justify-content:center;padding:20px;}
+#pf-lock.hidden{display:none;}
+.lock-card{background:#fff;border-radius:20px;padding:34px 30px;width:100%;max-width:380px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.4);}
+.lock-logo{width:64px;height:64px;border-radius:14px;background:#0f2044;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;}
+.lock-logo span{font-family:'Space Mono',monospace;font-size:24px;font-weight:700;color:#fff;letter-spacing:-2px;}
+.lock-logo span b{color:#1d9e75;}
+.lock-card h2{font-size:20px;font-weight:700;color:#0f2044;margin-bottom:4px;}
+.lock-card p{font-size:13px;color:#7a8499;margin-bottom:20px;}
+.lock-card input{width:100%;padding:12px 14px;border:1.5px solid #e4eaf4;border-radius:10px;font-family:'Space Mono',monospace;font-size:15px;color:#0f2044;outline:none;transition:border-color .15s;margin-bottom:12px;}
+.lock-card input:focus{border-color:#1d9e75;}
+.lock-card button{width:100%;padding:12px;background:#1d9e75;color:#fff;border:none;border-radius:10px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:15px;cursor:pointer;transition:background .15s;}
+.lock-card button:hover{background:#0f6e56;}
+.lock-err{color:#e24b4a;font-size:13px;font-weight:600;margin-top:12px;min-height:18px;}
+.lock-err.shake{animation:lockshake .4s;}
+@keyframes lockshake{0%,100%{transform:translateX(0);}25%{transform:translateX(-7px);}75%{transform:translateX(7px);}}
+</style>
+</head>
+<body>
+<div id="pf-lock">
+  <div class="lock-card">
+    <div class="lock-logo"><span>P<b>F</b></span></div>
+    <h2>PhysicsFlow</h2>
+    <p>Momentum &amp; Impulse Explorer &mdash; enter password to continue</p>
+    <input type="password" id="pf-pass" placeholder="Password" autocomplete="off" onkeydown="if(event.key==='Enter')pfUnlock()">
+    <button onclick="pfUnlock()">Unlock</button>
+    <div class="lock-err" id="pf-err"></div>
+  </div>
+</div>
+<header>
+  <div class="brand">
+    <div class="pf-logo"><div class="pf-logo-inner">P<span>F</span></div></div>
+    <div class="brand-text">
+      <h1>PhysicsFlow &#8212; <em>Momentum &amp; Impulse</em> Explorer</h1>
+      <p>Interactive Simulations</p>
+    </div>
+  </div>
+  <nav class="tab-bar" id="tabs"></nav>
+</header>
+<div class="main-wrap">
+
+
+<!-- TAB 1: MOMENTUM LAB -->
+<section class="panel active" id="t-mom">
+<div class="grid">
+  <div class="ctrl">
+    <h2 class="sec-title"><span class="num">01</span> Momentum Lab</h2>
+    <div class="pill-row"><span class="pill">p = mv</span><span class="pill">vector</span><span class="pill">kg&#183;m/s</span></div>
+    <div class="formula">p = mv</div>
+    <div class="sl-label">Mass, m <span id="mm-v">4.0 kg</span></div>
+    <input type="range" id="mm" min="0.5" max="10" step="0.5" value="4">
+    <div class="sl-label">Velocity, v <span id="mv-v">+3.0 m/s</span></div>
+    <input type="range" id="mv" min="-10" max="10" step="0.5" value="3">
+    <div class="readout">
+      <div class="metric t"><small>Momentum p</small><strong id="m-p">12.0 kg&#183;m/s</strong></div>
+      <div class="metric"><small>Direction</small><strong id="m-dir">Right &#8594;</strong></div>
+      <div class="metric"><small>If mass &#215;2</small><strong id="m-2m">24.0</strong></div>
+      <div class="metric a"><small>If speed &#215;2</small><strong id="m-2v">24.0</strong></div>
+    </div>
+    <div class="fb fi" id="m-fb" style="margin-top:9px;"></div>
+  </div>
+  <div class="vis">
+    <canvas id="mom-cv" height="300"></canvas>
+    <div class="key-idea"><b>Key idea:</b> Momentum is mass &times; velocity. Both mass and velocity double momentum equally &mdash; but only velocity sets direction. Negative v means moving left.</div>
+  </div>
+</div>
+</section>
+
+<!-- TAB 2: IMPULSE GRAPH LAB -->
+<section class="panel" id="t-imp">
+<div class="grid">
+  <div class="ctrl">
+    <h2 class="sec-title"><span class="num">02</span> Impulse Graph Lab</h2>
+    <div class="pill-row"><span class="pill">J = F&#916;t</span><span class="pill">area under F&#8211;t</span></div>
+    <div class="formula">J = area under F&#8211;t graph</div>
+    <div class="sl-label">Pulse shape</div>
+    <select id="i-shape">
+      <option value="rect">Rectangle (constant force)</option>
+      <option value="tri">Triangle (peak then zero)</option>
+    </select>
+    <div class="sl-label">Force, F <span id="i-f-v">40 N</span></div>
+    <input type="range" id="i-f" min="5" max="200" step="5" value="40">
+    <div class="sl-label">Contact time, &#916;t <span id="i-t-v">0.50 s</span></div>
+    <input type="range" id="i-t" min="0.05" max="2" step="0.05" value="0.5">
+    <div class="readout">
+      <div class="metric"><small>Shape</small><strong id="i-shape-o">Rectangle</strong></div>
+      <div class="metric t"><small>Impulse J</small><strong id="i-j">20.0 N&#183;s</strong></div>
+      <div class="metric"><small>Peak Force</small><strong id="i-f-o">40 N</strong></div>
+      <div class="metric a"><small>Contact &#916;t</small><strong id="i-t-o">0.50 s</strong></div>
+    </div>
+    <div class="fb fi" id="i-fb" style="margin-top:9px;"></div>
+  </div>
+  <div class="vis">
+    <canvas id="imp-cv" height="300"></canvas>
+    <div class="key-idea"><b>Area = impulse:</b> A wide low-force graph and a narrow high-force graph can have the same shaded area &mdash; and therefore the same impulse. Switch shapes to see this.</div>
+  </div>
+</div>
+</section>
+
+<!-- TAB 3: AIRBAG SAFETY -->
+<section class="panel" id="t-air">
+<div class="grid">
+  <div class="ctrl">
+    <h2 class="sec-title"><span class="num">03</span> Airbag Safety Simulation</h2>
+    <div class="pill-row"><span class="pill">F = &#916;p/&#916;t</span><span class="pill">injury risk</span></div>
+    <div class="formula">F&#8336;&#0118;&#0103; = &#916;p / &#916;t</div>
+    <div class="sl-label">Passenger mass <span id="a-m-v">60 kg</span></div>
+    <input type="range" id="a-m" min="20" max="100" step="5" value="60">
+    <div class="sl-label">Initial speed <span id="a-vi-v">20 m/s</span></div>
+    <input type="range" id="a-vi" min="5" max="35" step="1" value="20">
+    <div class="sl-label">Stopping time &#916;t <span id="a-t-v">0.25 s</span></div>
+    <input type="range" id="a-t" min="0.02" max="1.5" step="0.02" value="0.25">
+    <div class="readout">
+      <div class="metric"><small>&#916;p</small><strong id="a-dp">&#8212;</strong></div>
+      <div class="metric"><small>Stopping &#916;t</small><strong id="a-tout">&#8212;</strong></div>
+      <div class="metric r"><small>Avg Force</small><strong id="a-f">&#8212;</strong></div>
+      <div class="metric a"><small>Safety level</small><strong id="a-safe">&#8212;</strong></div>
+    </div>
+    <div class="fb fi" id="a-fb" style="margin-top:9px;"></div>
+  </div>
+  <div class="vis">
+    <canvas id="air-cv" height="330"></canvas>
+    <div class="key-idea"><b>Airbag principle:</b> The impulse (change in momentum) is fixed by the crash. A larger stopping time &#916;t spreads that impulse over more time, so the average force F on the passenger drops &mdash; lowering injury risk.</div>
+  </div>
+</div>
+</section>
+
+<!-- TAB 4: COLLISION SIMULATOR -->
+<section class="panel" id="t-col">
+<div class="grid">
+  <div class="ctrl">
+    <h2 class="sec-title"><span class="num">04</span> Collision Simulator</h2>
+    <div class="pill-row"><span class="pill">p before = p after</span><span class="pill">4 types</span></div>
+    <div class="formula" id="c-formula">p&#8321;v&#8321; + p&#8322;v&#8322; = const</div>
+    <div class="sl-label">Collision type</div>
+    <select id="c-type">
+      <option value="elastic">Elastic &#8212; bounce apart, KE conserved</option>
+      <option value="inelastic">Inelastic &#8212; bounce, some KE lost</option>
+      <option value="perfect">Perfectly inelastic &#8212; stick together</option>
+      <option value="recoil">Recoil / explosion &#8212; carts push apart from rest</option>
+    </select>
+    <div class="sl-label">m&#8321; <span id="c-m1-v">2.0 kg</span></div>
+    <input type="range" id="c-m1" min="0.5" max="8" step="0.5" value="2">
+    <div class="sl-label" id="c-v1-row">v&#8321;&#7522; <span id="c-v1-v">+4.0 m/s</span></div>
+    <input type="range" id="c-v1" min="-8" max="8" step="0.5" value="4">
+    <div class="sl-label">m&#8322; <span id="c-m2-v">3.0 kg</span></div>
+    <input type="range" id="c-m2" min="0.5" max="8" step="0.5" value="3">
+    <div class="sl-label" id="c-v2-row">v&#8322;&#7522; <span id="c-v2-v">-1.0 m/s</span></div>
+    <input type="range" id="c-v2" min="-8" max="8" step="0.5" value="-1">
+    <div class="readout">
+      <div class="metric t"><small>p before</small><strong id="c-pb">&#8212;</strong></div>
+      <div class="metric t"><small>p after</small><strong id="c-pa">&#8212;</strong></div>
+      <div class="metric"><small>v&#8321;f</small><strong id="c-v1f">&#8212;</strong></div>
+      <div class="metric a"><small>v&#8322;f</small><strong id="c-v2f">&#8212;</strong></div>
+    </div>
+    <div class="btn-row">
+      <button class="sim-btn go" id="c-go" onclick="collGo()">&#9654; Run</button>
+      <button class="sim-btn reset" onclick="collReset()">&#8635; Reset</button>
+    </div>
+    <div class="fb fi" id="c-fb" style="margin-top:9px;"></div>
+  </div>
+  <div class="vis">
+    <canvas id="col-cv" height="220"></canvas>
+    <canvas id="bar-cv" height="160" style="margin-top:10px;"></canvas>
+    <div class="key-idea" id="c-keyidea"><b>Bar chart:</b> Watch individual and total momenta before and after. Total momentum (navy bar) stays constant regardless of collision type.</div>
+  </div>
+</div>
+</section>
+
+<!-- TAB 5: CHALLENGE + QUIZ -->
+<section class="panel" id="t-quiz">
+<div class="qcard">
+  <h2 class="sec-title"><span class="num">05</span> Quiz</h2>
+  <p style="font-size:13px;color:var(--muted);margin-bottom:14px;">Answer all 10 questions, then check your score. Use the simulation tabs if you need to verify.</p>
+
+  <div id="quizBox"></div>
+  <div class="btn-row" style="margin-top:12px;">
+    <button class="chk-btn" style="background:var(--teal);" onclick="showScore()">Show my score</button>
+    <button class="chk-btn" onclick="resetQuiz()">Reset quiz</button>
+  </div>
+  <div class="score-wrap" id="scoreWrap">
+    <div class="score-big" id="scoreBig">0/10</div>
+    <div class="score-sub" id="scoreSub"></div>
+  </div>
+</div>
+</section>
+</div>
+<footer>&#169; PhysicsFlow &#8212; Interactive Physics Learning for Modern Classrooms</footer>
+
+<script>
+/* ── PASSWORD GATE (SHA-256) ── */
+const PF_HASH='e6646e318e9fd355811b60083493a8f949716478703748245dfdf6586aeae06b';
+async function pfSha256(str){
+  const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+async function pfUnlock(){
+  const inp=document.getElementById('pf-pass');
+  const err=document.getElementById('pf-err');
+  const h=await pfSha256(inp.value);
+  if(h===PF_HASH){
+    try{sessionStorage.setItem('pf_unlocked',PF_HASH);}catch(e){}
+    document.getElementById('pf-lock').classList.add('hidden');
+  } else {
+    err.textContent='Incorrect password. Please try again.';
+    err.classList.remove('shake');void err.offsetWidth;err.classList.add('shake');
+    inp.value='';inp.focus();
+  }
+}
+(function(){
+  let ok=false;
+  try{ok=sessionStorage.getItem('pf_unlocked')===PF_HASH;}catch(e){}
+  if(ok){
+    const l=document.getElementById('pf-lock');
+    if(l)l.classList.add('hidden');
+  } else {
+    try{sessionStorage.removeItem('pf_unlocked');}catch(e){}
+    window.addEventListener('DOMContentLoaded',()=>{const p=document.getElementById('pf-pass');if(p)p.focus();});
+  }
+})();
+
+const $=id=>document.getElementById(id);
+const val=id=>parseFloat($(id).value);
+const set=(id,t)=>{const e=$(id);if(e)e.textContent=t;};
+const fmt=(x,d=1)=>Number(x).toFixed(d);
+const sf=(x,d=1)=>(x>=0?'+':'')+fmt(x,d);
+
+const CN='#0f2044',CT='#1d9e75',CA='#ef9f27',CR='#e24b4a',
+      CB='#378add',CGR='#94a3b8',CGM='#c4ccda',CW='#ffffff',
+      COFF='#f6f9fc',CTP='#e1f5ee',CAP='#faeeda',CPU='#6d28d9';
+
+function clearCV(id,h){
+  const c=$(id),ctx=c.getContext('2d');
+  c.width=c.offsetWidth||760; c.height=h||300;
+  ctx.fillStyle=COFF; ctx.fillRect(0,0,c.width,c.height);
+  return ctx;
+}
+function rr(ctx,x,y,w,h,r){
+  if(w<=0||h<=0)return;
+  ctx.beginPath();ctx.moveTo(x+r,y);
+  ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);
+  ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);
+  ctx.closePath();
+}
+function arrowH(ctx,x,y,len,col,w){
+  if(Math.abs(len)<2)return;
+  ctx.save();ctx.strokeStyle=col;ctx.fillStyle=col;ctx.lineWidth=w||4;ctx.lineCap='round';
+  ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+len,y);ctx.stroke();
+  const s=Math.sign(len);
+  ctx.beginPath();ctx.moveTo(x+len,y);ctx.lineTo(x+len-11*s,y-7);ctx.lineTo(x+len-11*s,y+7);ctx.closePath();ctx.fill();
+  ctx.restore();
+}
+function arrowLabH(ctx,x,y,len,col,lbl){
+  arrowH(ctx,x,y,len,col,4);
+  if(!lbl)return;
+  ctx.save();ctx.fillStyle=col;ctx.font='bold 13px Space Mono,monospace';
+  ctx.textAlign='center';ctx.textBaseline='bottom';
+  ctx.fillText(lbl,x+len/2,y-6);
+  ctx.restore();
+}
+function drawCart(ctx,x,y,w,col,lbl,sub){
+  ctx.save();
+  ctx.fillStyle=col;ctx.strokeStyle=CN;ctx.lineWidth=2;
+  rr(ctx,x,y,w,50,8);ctx.fill();ctx.stroke();
+  ctx.fillStyle=CW;ctx.font='bold 14px Space Mono,monospace';
+  ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText(lbl,x+w/2,y+(sub?20:25));
+  if(sub){ctx.font='11px DM Sans,sans-serif';ctx.fillText(sub,x+w/2,y+36);}
+  ctx.fillStyle=CN;
+  [0.22,0.78].forEach(f=>{ctx.beginPath();ctx.arc(x+w*f,y+56,8,0,Math.PI*2);ctx.fill();});
+  ctx.restore();
+}
+function track(ctx,W,y){
+  ctx.save();ctx.strokeStyle=CGM;ctx.lineWidth=2;ctx.setLineDash([6,4]);
+  ctx.beginPath();ctx.moveTo(20,y);ctx.lineTo(W-20,y);ctx.stroke();
+  ctx.setLineDash([]);ctx.restore();
+}
+function chip(ctx,x,y,txt,bg,fg,pw){
+  pw=pw||200;
+  ctx.save();ctx.fillStyle=bg;
+  rr(ctx,x-pw/2,y-13,pw,26,6);ctx.fill();
+  ctx.fillStyle=fg;ctx.font='bold 12px Space Mono,monospace';
+  ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText(txt,x,y);ctx.restore();
+}
+function monoT(ctx,txt,x,y,col,sz){
+  ctx.save();ctx.fillStyle=col||CN;ctx.font='bold '+(sz||15)+'px Space Mono,monospace';
+  ctx.textBaseline='middle';ctx.fillText(txt,x,y);ctx.restore();
+}
+function dmT(ctx,txt,x,y,col,sz){
+  ctx.save();ctx.fillStyle=col||CN;ctx.font='600 '+(sz||13)+'px DM Sans,Arial';
+  ctx.textBaseline='middle';ctx.fillText(txt,x,y);ctx.restore();
+}
+
+function puffCushion(ctx,cx,cy,r){
+  const n=9;
+  const pts=[];
+  for(let i=0;i<n;i++){
+    const a=(i/n)*Math.PI*2 - Math.PI/2;
+    pts.push([cx+Math.cos(a)*r, cy+Math.sin(a)*r*0.82]);
+  }
+  ctx.beginPath();
+  const start=[(pts[0][0]+pts[n-1][0])/2,(pts[0][1]+pts[n-1][1])/2];
+  ctx.moveTo(start[0],start[1]);
+  for(let i=0;i<n;i++){
+    const cur=pts[i], next=pts[(i+1)%n];
+    const mid=[(cur[0]+next[0])/2,(cur[1]+next[1])/2];
+    ctx.quadraticCurveTo(cur[0],cur[1],mid[0],mid[1]);
+  }
+  ctx.closePath();
+}
+
+/* ══ TAB 1: MOMENTUM ══ */
+function drawMom(){
+  const m=val('mm'),v=val('mv'),p=m*v;
+  set('mm-v',fmt(m)+' kg'); set('mv-v',sf(v)+' m/s');
+  set('m-p',fmt(Math.abs(p),1)+' kg\u00b7m/s');
+  set('m-dir',p>0?'Right \u2192':p<0?'\u2190 Left':'Zero');
+  set('m-2m',fmt(Math.abs(2*m*v),1)); set('m-2v',fmt(Math.abs(m*2*v),1));
+  $('m-fb').textContent = p===0 ? 'Zero momentum \u2014 stationary or zero mass.'
+    : 'p = '+fmt(m)+' \u00d7 '+sf(v)+' = '+sf(p,1)+' kg\u00b7m/s';
+  const W=760,H=300,ctx=clearCV('mom-cv',H);
+  chip(ctx,W/2,26,'p = m \u00d7 v',CN,CA,160);
+  ctx.save();ctx.fillStyle='rgba(15,32,68,0.05)';rr(ctx,18,52,230,130,8);ctx.fill();ctx.restore();
+  monoT(ctx,'m = '+fmt(m,1)+' kg',30,75,CN,14);
+  monoT(ctx,'v = '+sf(v,1)+' m/s',30,98,v>=0?CT:CR,14);
+  monoT(ctx,'p = '+sf(p,1)+' kg\u00b7m/s',30,122,CA,15);
+  dmT(ctx,'\u00d72 mass \u2192 p = '+sf(2*p,1),30,148,CGR,12);
+  dmT(ctx,'\u00d72 speed \u2192 p = '+sf(2*p,1),30,165,CGR,12);
+  track(ctx,W,248);
+  const cartW=Math.max(70,Math.min(110,m*12));
+  drawCart(ctx,W/2-cartW/2,182,cartW,p>=0?CT:CR,'m',fmt(m,1)+'kg');
+  if(v!==0){const len=Math.min(200,Math.abs(v)*18)*Math.sign(v);arrowLabH(ctx,W/2,165,len,v>0?CT:CR,'v');}
+  const bY=272,bX=18,bW=W-36;
+  ctx.save();ctx.fillStyle=CGM;rr(ctx,bX,bY,bW,18,5);ctx.fill();
+  const pPct=Math.min(Math.abs(p)/(10*10),1);
+  ctx.fillStyle=p>=0?CT:CR;rr(ctx,bX,bY,Math.max(pPct*bW,6),18,5);ctx.fill();ctx.restore();
+  monoT(ctx,'|p| = '+fmt(Math.abs(p),1)+' kg\u00b7m/s',bX+8,bY+9,CW,11);
+}
+
+/* ══ TAB 2: IMPULSE ══ */
+function drawImp(){
+  const F=val('i-f'),dt=val('i-t'),shape=$('i-shape').value;
+  const J=shape==='tri'?0.5*F*dt:F*dt;
+  set('i-f-v',fmt(F,0)+' N'); set('i-t-v',fmt(dt,2)+' s');
+  set('i-shape-o',shape==='tri'?'Triangle':'Rectangle');
+  set('i-f-o',fmt(F,0)+' N'); set('i-t-o',fmt(dt,2)+' s');
+  set('i-j',fmt(J,2)+' N\u00b7s');
+  $('i-fb').textContent='J = '+(shape==='tri'?'0.5 \u00d7 ':'')+fmt(F,0)+' \u00d7 '+fmt(dt,2)+' = '+fmt(J,2)+' N\u00b7s';
+  const W=760,H=300,ctx=clearCV('imp-cv',H);
+  chip(ctx,W/2,24,'J = area under F\u2013t graph',CN,CA,280);
+  const ox=70,oy=260,gW=620,gH=195;
+  ctx.save();ctx.strokeStyle=CN;ctx.lineWidth=2.5;
+  ctx.beginPath();ctx.moveTo(ox,oy-gH);ctx.lineTo(ox,oy);ctx.lineTo(ox+gW,oy);ctx.stroke();ctx.restore();
+  monoT(ctx,'F(N)',18,oy-gH/2,CN,12);monoT(ctx,'t(s)',ox+gW+8,oy+2,CN,12);
+  ctx.save();ctx.font='11px Space Mono,monospace';
+  for(let i=0;i<=4;i++){const tx=ox+i*(gW/4);ctx.fillStyle=CGR;ctx.textAlign='center';ctx.fillText((i/4*2).toFixed(1),tx,oy+16);ctx.strokeStyle=CGM;ctx.lineWidth=0.5;ctx.beginPath();ctx.moveTo(tx,oy);ctx.lineTo(tx,oy-gH);ctx.stroke();}
+  [0,50,100,150,200].forEach(fv=>{const fy=oy-(fv/200)*gH;ctx.fillStyle=CGR;ctx.textAlign='right';ctx.fillText(fv,ox-4,fy+4);ctx.strokeStyle=CGM;ctx.lineWidth=0.5;ctx.beginPath();ctx.moveTo(ox,fy);ctx.lineTo(ox+gW,fy);ctx.stroke();});
+  ctx.restore();
+  const maxF=200,tMax=2;
+  const bW=Math.max(4,(dt/tMax)*gW);
+  const bH=Math.max(2,(F/maxF)*gH);
+  ctx.save();ctx.fillStyle='rgba(29,158,117,0.28)';ctx.strokeStyle=CT;ctx.lineWidth=2.5;
+  if(shape==='rect'){ctx.fillRect(ox,oy-bH,bW,bH);ctx.strokeRect(ox,oy-bH,bW,bH);}
+  else{ctx.beginPath();ctx.moveTo(ox,oy);ctx.lineTo(ox+bW/2,oy-bH);ctx.lineTo(ox+bW,oy);ctx.closePath();ctx.fill();ctx.stroke();}
+  ctx.restore();
+  chip(ctx,ox+bW/2,oy-bH/2,'J = '+fmt(J,2)+' N\u00b7s',CTP,'#0f6e56',180);
+  monoT(ctx,'\u0394t = '+fmt(dt,2)+' s',ox+bW/2-20,oy+30,CN,12);
+}
+
+/* ══ TAB 3: AIRBAG (improved) ══ */
+function drawAir(){
+  const m=val('a-m'),vi=val('a-vi'),dt=val('a-t');
+  const dp=m*vi, F=dp/dt;
+  set('a-m-v',fmt(m,0)+' kg'); set('a-vi-v',fmt(vi,0)+' m/s'); set('a-t-v',fmt(dt,2)+' s');
+  set('a-dp',fmt(dp,0)+' kg\u00b7m/s'); set('a-tout',fmt(dt,2)+' s'); set('a-f',fmt(F,0)+' N');
+  const safe=dt>0.8?'LOW risk':dt>0.3?'MEDIUM':'HIGH risk';
+  set('a-safe',safe);
+  $('a-fb').textContent='F = \u0394p/\u0394t = '+fmt(dp,0)+' / '+fmt(dt,2)+' = '+fmt(F,0)+' N \u2014 '+(dt>0.8?'a long stopping time means a gentle, survivable force.':dt>0.3?'moderate force on the passenger.':'a very short stopping time means a dangerous, large force.');
+
+  const W=760,H=330,ctx=clearCV('air-cv',H);
+  chip(ctx,W/2,22,'Longer stopping time \u2192 smaller force',CN,CA,300);
+
+  // ── Car body (cabin, facing right) ──
+  const carX=44,carY=64,carW=330,carH=120;
+  ctx.save();
+  ctx.fillStyle='#dbe6f5';ctx.strokeStyle=CN;ctx.lineWidth=2.5;
+  rr(ctx,carX,carY+52,carW,carH-34,16);ctx.fill();ctx.stroke();
+  // cabin roof / windshield (slopes down toward the front/right)
+  ctx.fillStyle='#c3d6ef';
+  ctx.beginPath();
+  ctx.moveTo(carX+44,carY+52);
+  ctx.lineTo(carX+78,carY+10);
+  ctx.lineTo(carX+232,carY+10);
+  ctx.lineTo(carX+286,carY+52);
+  ctx.closePath();ctx.fill();ctx.stroke();
+  // wheels
+  ctx.fillStyle=CN;
+  ctx.beginPath();ctx.arc(carX+72,carY+carH+22,21,0,Math.PI*2);ctx.fill();
+  ctx.beginPath();ctx.arc(carX+carW-72,carY+carH+22,21,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#94a3b8';
+  ctx.beginPath();ctx.arc(carX+72,carY+carH+22,9,0,Math.PI*2);ctx.fill();
+  ctx.beginPath();ctx.arc(carX+carW-72,carY+carH+22,9,0,Math.PI*2);ctx.fill();
+  ctx.restore();
+
+  // Interior reference heights
+  const floorY=carY+carH+8;                  // cabin floor (inside the body)
+  // ── Seat (behind driver) with headrest ──
+  const px=carX+96,py=carY+64;               // driver head centre, near the roof
+  ctx.save();
+  ctx.fillStyle='#9fb4d4';ctx.strokeStyle=CN;ctx.lineWidth=2;
+  rr(ctx,px-30,py-16,15,floorY-26-(py-16),6);ctx.fill();ctx.stroke(); // seat back to seat base
+  rr(ctx,px-32,py-30,21,20,7);ctx.fill();ctx.stroke();        // headrest
+  rr(ctx,px-30,floorY-16,60,12,5);ctx.fill();ctx.stroke();    // seat base on floor
+  ctx.restore();
+
+  // ── Driver (head, torso, thigh, arm) ──
+  ctx.save();
+  ctx.strokeStyle=CN;ctx.lineWidth=2.5;
+  ctx.fillStyle='#f0b89a';
+  ctx.beginPath();ctx.arc(px,py,14,0,Math.PI*2);ctx.fill();ctx.stroke();   // head
+  // torso: seated upright, reaches down to the hips on the seat
+  ctx.fillStyle='#5a7fb5';
+  ctx.beginPath();
+  ctx.moveTo(px-12,py+13);
+  ctx.lineTo(px+14,py+17);
+  ctx.lineTo(px+18,floorY-18);
+  ctx.lineTo(px-11,floorY-18);
+  ctx.closePath();ctx.fill();ctx.stroke();
+  // thigh along the seat base
+  rr(ctx,px-4,floorY-20,48,13,6);ctx.fill();ctx.stroke();
+  ctx.restore();
+
+  // ── Dashboard + steering wheel + column (in front of driver) ──
+  const wheelX=carX+214, wheelY=py+40;       // wheel at hand/chest height
+  ctx.save();
+  // dashboard: a low, rounded console tucked under the windshield
+  ctx.fillStyle='#aebfda';ctx.strokeStyle=CN;ctx.lineWidth=2;
+  ctx.beginPath();
+  ctx.moveTo(carX+238,carY+78);                                  // top-left, just in front of wheel
+  ctx.quadraticCurveTo(carX+250,carY+56,carX+292,carY+56);       // humped top rising to windshield
+  ctx.lineTo(carX+292,carY+92);                                  // down the front face
+  ctx.lineTo(carX+236,carY+92);                                  // back along the base
+  ctx.closePath();ctx.fill();ctx.stroke();
+  // steering column from the dashboard out to the wheel hub
+  ctx.strokeStyle='#475569';ctx.lineWidth=5;ctx.lineCap='round';
+  ctx.beginPath();ctx.moveTo(carX+240,carY+84);ctx.lineTo(wheelX,wheelY);ctx.stroke();
+  // wheel rim (edge-on ellipse)
+  ctx.strokeStyle=CN;ctx.lineWidth=4;
+  ctx.beginPath();ctx.ellipse(wheelX,wheelY,7,22,0,0,Math.PI*2);ctx.stroke();
+  ctx.fillStyle='#475569';ctx.beginPath();ctx.arc(wheelX,wheelY,5,0,Math.PI*2);ctx.fill(); // hub
+  ctx.restore();
+
+  // driver arm: shoulder -> elbow -> hand (bent, reaching forward)
+  ctx.save();
+  ctx.strokeStyle='#e8a98a';ctx.lineWidth=7;ctx.lineCap='round';ctx.lineJoin='round';
+  const shX=px+8,shY=py+20;                  // shoulder
+  const elX=px+30,elY=py+30;                 // elbow (forward + slightly down)
+  const haX=px+52,haY=py+24;                 // hand (forward, raised toward wheel level)
+  ctx.beginPath();ctx.moveTo(shX,shY);ctx.lineTo(elX,elY);ctx.lineTo(haX,haY);ctx.stroke();
+  // hand
+  ctx.fillStyle='#f0b89a';ctx.strokeStyle=CN;ctx.lineWidth=1.5;
+  ctx.beginPath();ctx.arc(haX,haY,5,0,Math.PI*2);ctx.fill();ctx.stroke();
+  ctx.restore();
+
+  // ── AIRBAG: deploys from the wheel hub toward the driver, grows with Δt ──
+  const bagR=16+(dt/1.5)*40;                 // 16 (short Δt) → 56 (long Δt)
+  const bagCX=wheelX-12-bagR;                // right edge near the wheel; grows left toward driver
+  const bagCY=wheelY-4;                      // chest / face height
+  ctx.save();
+  puffCushion(ctx,bagCX,bagCY,bagR);
+  ctx.fillStyle='rgba(250,199,117,0.88)';ctx.fill();
+  ctx.strokeStyle=CA;ctx.lineWidth=2.5;ctx.stroke();
+  ctx.beginPath();
+  ctx.ellipse(bagCX-bagR*0.22,bagCY-bagR*0.22,bagR*0.5,bagR*0.4,0,0,Math.PI*2);
+  ctx.fillStyle='rgba(255,255,255,0.45)';ctx.fill();
+  ctx.strokeStyle='rgba(133,79,11,0.5)';ctx.lineWidth=2;ctx.setLineDash([3,3]);
+  ctx.beginPath();ctx.moveTo(bagCX+bagR*0.7,bagCY);ctx.lineTo(wheelX,wheelY);ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle='#854f0b';ctx.font='bold 10px Space Mono,monospace';ctx.textAlign='center';
+  ctx.fillText('AIRBAG',bagCX,bagCY);
+  ctx.restore();
+
+  // motion arrow (driver pushed forward into the bag)
+  arrowLabH(ctx,px+4,py-26,Math.min(44,vi*1.5),CT,'v\u1d35');
+
+  // ── FORCE GAUGE (semicircular meter) ──
+  const gx=W-150,gy=200,gr=78;
+  ctx.save();
+  // arc background
+  ctx.lineWidth=16;ctx.lineCap='round';
+  ctx.strokeStyle='#e4eaf4';
+  ctx.beginPath();ctx.arc(gx,gy,gr,Math.PI,2*Math.PI);ctx.stroke();
+  // force fraction (cap at a reference of 30000 N)
+  const fFrac=Math.min(F/30000,1);
+  // colour by risk
+  const gcol=fFrac>0.66?CR:fFrac>0.33?CA:CT;
+  ctx.strokeStyle=gcol;
+  ctx.beginPath();ctx.arc(gx,gy,gr,Math.PI,Math.PI+fFrac*Math.PI);ctx.stroke();
+  ctx.restore();
+  // needle
+  ctx.save();
+  const ang=Math.PI+fFrac*Math.PI;
+  ctx.strokeStyle=CN;ctx.lineWidth=3;ctx.lineCap='round';
+  ctx.beginPath();ctx.moveTo(gx,gy);ctx.lineTo(gx+Math.cos(ang)*(gr-10),gy+Math.sin(ang)*(gr-10));ctx.stroke();
+  ctx.fillStyle=CN;ctx.beginPath();ctx.arc(gx,gy,6,0,Math.PI*2);ctx.fill();
+  ctx.restore();
+  // gauge labels
+  ctx.save();ctx.fillStyle=CT;ctx.font='10px Space Mono,monospace';ctx.textAlign='center';
+  ctx.fillText('safe',gx-gr,gy+16);
+  ctx.fillStyle=CR;ctx.fillText('danger',gx+gr,gy+16);
+  ctx.restore();
+  monoT(ctx,fmt(F,0)+' N',gx-28,gy+34,gcol,18);
+  dmT(ctx,'average force',gx-38,gy+54,CN,12);
+
+  // ── bottom comparison: Δp constant ──
+  chip(ctx,W/2,300,'\u0394p = '+fmt(dp,0)+' kg\u00b7m/s (fixed by the crash)',CTP,'#0f6e56',310);
+}
+
+/* ══ TAB 4: COLLISION (4 types incl recoil/explosion) ══ */
+let collAnim=null;
+const COEF_INELASTIC=0.5;
+
+function isRecoil(){return $('c-type').value==='recoil';}
+
+function syncCollUI(){
+  const type=$('c-type').value;
+  const rec=type==='recoil';
+  // For recoil: both carts start at rest, hide initial velocity sliders meaning;
+  // reinterpret v1 slider as "push/explosion speed of cart 1"
+  if(rec){
+    $('c-v1-row').innerHTML='Push speed of m&#8321; (recoils left) <span id="c-v1-v"></span>';
+    $('c-v2-row').style.display='none';
+    $('c-v2').style.display='none';
+    $('c-v1').min=0.5;$('c-v1').max=8;if(val('c-v1')<=0)$('c-v1').value=4;
+    $('c-formula').textContent='0 = m\u2081v\u2081 + m\u2082v\u2082';
+  } else {
+    $('c-v1-row').innerHTML='v\u2081\u1d62 <span id="c-v1-v"></span>';
+    $('c-v2-row').style.display='';
+    $('c-v2').style.display='';
+    $('c-v1').min=-8;$('c-v1').max=8;
+    $('c-formula').textContent='p\u2081v\u2081 + p\u2082v\u2082 = const';
+  }
+}
+
+function collCalc(){
+  const type=$('c-type').value;
+  const m1=val('c-m1'),m2=val('c-m2');
+  let v1,v2,v1f,v2f;
+  if(type==='recoil'){
+    // start from rest, push apart. v1 slider = push speed of cart 1 (green, to the LEFT)
+    v1=0;v2=0;
+    const s=val('c-v1');
+    v1f=-s;                 // green cart m1 recoils to the left
+    v2f=-(m1*v1f)/m2;       // amber cart m2 goes right; total p stays 0
+  } else {
+    v1=val('c-v1');v2=val('c-v2');
+    if(type==='perfect'){v1f=v2f=(m1*v1+m2*v2)/(m1+m2);}
+    else if(type==='inelastic'){
+      const e=COEF_INELASTIC;
+      v1f=(m1*v1+m2*v2+m2*e*(v2-v1))/(m1+m2);
+      v2f=(m1*v1+m2*v2+m1*e*(v1-v2))/(m1+m2);
+    } else { // elastic
+      v1f=((m1-m2)*v1+2*m2*v2)/(m1+m2);
+      v2f=((m2-m1)*v2+2*m1*v1)/(m1+m2);
+    }
+  }
+  const pb=m1*v1+m2*v2, pa=m1*v1f+m2*v2f;
+  const kb=0.5*m1*v1*v1+0.5*m2*v2*v2, ka=0.5*m1*v1f*v1f+0.5*m2*v2f*v2f;
+  set('c-m1-v',fmt(m1)+' kg'); set('c-m2-v',fmt(m2)+' kg');
+  if($('c-v1-v')) set('c-v1-v',(type==='recoil'?fmt(val('c-v1'),1):sf(v1))+' m/s');
+  if($('c-v2-v')) set('c-v2-v',sf(v2)+' m/s');
+  set('c-pb',sf(pb,1)+' kg\u00b7m/s'); set('c-pa',sf(pa,1)+' kg\u00b7m/s');
+  set('c-v1f',sf(v1f,2)+' m/s'); set('c-v2f',sf(v2f,2)+' m/s');
+  return {m1,v1,m2,v2,v1f,v2f,pb,pa,kb,ka,type};
+}
+
+function drawCollScene(cd,phase,x1,x2){
+  const W=760,H=220,ctx=clearCV('col-cv',H);
+  const w1=Math.max(60,Math.min(100,cd.m1*13));
+  const w2=Math.max(60,Math.min(100,cd.m2*13));
+  track(ctx,W,186);
+  const c1=CT,c2= cd.type==='perfect'?CPU:CA;
+  drawCart(ctx,x1-w1/2,122,w1,c1,'m\u2081',fmt(cd.m1,1)+'kg');
+  drawCart(ctx,x2-w2/2,122,w2,c2,'m\u2082',fmt(cd.m2,1)+'kg');
+  const recoil=cd.type==='recoil';
+  if(phase==='before'){
+    chip(ctx,W/2,22,recoil?'BEFORE \u2014 at rest, p = 0':'BEFORE',CN,CA,recoil?220:120);
+    if(recoil){
+      monoT(ctx,'both at rest',W/2-44,108,CGR,12);
+    } else {
+      arrowLabH(ctx,x1+w1/2+4,138,Math.min(60,Math.abs(cd.v1)*10)*Math.sign(cd.v1),cd.v1>=0?CT:CR,'v\u2081');
+      arrowLabH(ctx,x2-w2/2-4,138,Math.min(60,Math.abs(cd.v2)*10)*Math.sign(cd.v2)*-1,cd.v2<=0?CR:CT,'v\u2082');
+    }
+  } else {
+    chip(ctx,W/2,22,recoil?'AFTER \u2014 push apart':'AFTER',CN,CA,recoil?200:120);
+    if(Math.abs(cd.v1f)>0.05) arrowLabH(ctx,x1+(cd.v1f>0?w1/2+4:-w1/2-4),138,Math.min(70,Math.abs(cd.v1f)*10)*Math.sign(cd.v1f),cd.v1f>0?CT:CR,'v\u2081f');
+    else monoT(ctx,'stops',x1-14,110,CT,11);
+    if(Math.abs(cd.v2f)>0.05) arrowLabH(ctx,x2+(cd.v2f>0?w2/2+4:-w2/2-4),138,Math.min(70,Math.abs(cd.v2f)*10)*Math.sign(cd.v2f),cd.v2f>0?c2:CR,'v\u2082f');
+    const kloss=cd.kb-cd.ka;
+    let lab,bg,fg;
+    if(cd.type==='elastic'){lab='KE conserved \u2713';bg=CTP;fg='#0f6e56';}
+    else if(cd.type==='recoil'){lab='KE gained from PE: '+fmt(Math.abs(kloss),1)+' J';bg=CTP;fg='#0f6e56';}
+    else {lab='KE lost: '+fmt(Math.max(kloss,0),1)+' J';bg='#fcebeb';fg='#991b1b';}
+    chip(ctx,W/2,200,lab,bg,fg,240);
+  }
+}
+
+function drawBars(cd){
+  const W=760,H=160,ctx=clearCV('bar-cv',H);
+  const p1b=cd.m1*cd.v1, p2b=cd.m2*cd.v2;
+  const p1a=cd.m1*cd.v1f, p2a=cd.m2*cd.v2f;
+  const vals=[p1b,p2b,p1b+p2b,p1a,p2a,p1a+p2a];
+  const labs=['p\u2081 before','p\u2082 before','total before','p\u2081 after','p\u2082 after','total after'];
+  const cols=[CT,CA,CN,CT,CA,CN];
+  const mx=Math.max(1,...vals.map(Math.abs));
+  const zeroX=W/2,barH=14,gapY=22;
+  chip(ctx,W/2,14,'Momentum bar chart (before \u2192 after)',CN,CA,310);
+  ctx.save();ctx.strokeStyle=CGM;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(zeroX,28);ctx.lineTo(zeroX,H-10);ctx.stroke();ctx.restore();
+  vals.forEach((v,i)=>{
+    const y=30+i*gapY;
+    const bW=(v/mx)*(W/2-90);
+    ctx.save();ctx.fillStyle=cols[i]+((i===2||i===5)?'':'99');
+    rr(ctx,v>=0?zeroX:zeroX+bW,y,Math.abs(bW)||2,barH,3);ctx.fill();ctx.restore();
+    ctx.save();ctx.fillStyle=CN;ctx.font='11px Space Mono,monospace';ctx.textBaseline='middle';
+    ctx.textAlign=v>=0?'right':'left';
+    ctx.fillText(labs[i]+' = '+sf(v,1),v>=0?zeroX-3:zeroX+3,y+barH/2);ctx.restore();
+  });
+}
+
+function collGo(){
+  if(collAnim){cancelAnimationFrame(collAnim);collAnim=null;}
+  $('c-go').disabled=true;
+  const cd=collCalc();
+  const W=760;
+  const w1=Math.max(60,Math.min(100,cd.m1*13));
+  const w2=Math.max(60,Math.min(100,cd.m2*13));
+  const recoil=cd.type==='recoil';
+  let x1,x2,collided=false,frame=0;
+  if(recoil){
+    // start touching in the middle, push apart
+    x1=W/2-w1/2; x2=W/2+w2/2; collided=true;
+    $('c-fb').textContent='Pushing apart from rest\u2026';
+  } else {
+    x1=120+w1/2; x2=W-120-w2/2;
+    $('c-fb').textContent='Launching\u2026';
+  }
+  function step(){
+    if(recoil){
+      x1+=cd.v1f*2; x2+=cd.v2f*2; frame++;
+      drawCollScene(cd,'after',x1,x2);drawBars(cd);
+      $('c-fb').textContent='v\u2081f = '+sf(cd.v1f,2)+' m/s, v\u2082f = '+sf(cd.v2f,2)+' m/s. Total p = '+sf(cd.pa,1)+' \u2248 0';
+      if(frame>70){collAnim=null;$('c-go').disabled=false;return;}
+    } else if(!collided){
+      x1+=cd.v1*2; x2+=cd.v2*2;
+      if(x1+w1/2>=x2-w2/2){collided=true;frame=0;}
+      drawCollScene(cd,'before',x1,x2);drawBars(cd);
+    } else {
+      x1+=cd.v1f*2; x2+=cd.v2f*2; frame++;
+      drawCollScene(cd,'after',x1,x2);drawBars(cd);
+      $('c-fb').textContent='After: v\u2081f = '+sf(cd.v1f,2)+' m/s, v\u2082f = '+sf(cd.v2f,2)+' m/s';
+      if(frame>55){collAnim=null;$('c-go').disabled=false;return;}
+    }
+    collAnim=requestAnimationFrame(step);
+  }
+  collAnim=requestAnimationFrame(step);
+}
+
+function collReset(){
+  if(collAnim){cancelAnimationFrame(collAnim);collAnim=null;}
+  $('c-go').disabled=false;
+  syncCollUI();
+  const cd=collCalc();
+  const W=760;
+  const w1=Math.max(60,Math.min(100,cd.m1*13));
+  const w2=Math.max(60,Math.min(100,cd.m2*13));
+  if(cd.type==='recoil'){
+    drawCollScene(cd,'before',W/2-w1/2,W/2+w2/2);
+    $('c-fb').textContent='Carts start at rest, touching. Press Run to push apart.';
+  } else {
+    drawCollScene(cd,'before',120+w1/2,W-120-w2/2);
+    $('c-fb').textContent='Adjust parameters and press Run.';
+  }
+  drawBars(cd);
+}
+
+
+/* ══ QUIZ ══ */
+const quiz=[
+  {q:'A 3 kg cart moves at 4 m/s. What is its momentum?',
+   opts:['7 kg\u00b7m/s','12 kg\u00b7m/s','1.3 kg\u00b7m/s','0.75 kg\u00b7m/s'],a:1,
+   why:'p = mv = 3 \u00d7 4 = 12 kg\u00b7m/s.'},
+  {q:'Doubling the velocity of an object has what effect on its momentum?',
+   opts:['No change','Doubles it','Halves it','Quadruples it'],a:1,
+   why:'p = mv. Doubling v doubles the momentum, since they are directly proportional.'},
+  {q:'A force\u2013time graph shows a triangle of height 80 N and base 0.5 s. What is the impulse?',
+   opts:['40 N\u00b7s','20 N\u00b7s','80 N\u00b7s','0.5 N\u00b7s'],a:1,
+   why:'J = \u00bd \u00d7 F \u00d7 \u0394t = 0.5 \u00d7 80 \u00d7 0.5 = 20 N\u00b7s.'},
+  {q:'A force of 250 N acts for 0.8 s (constant). What is the impulse?',
+   opts:['200 N\u00b7s','312 N\u00b7s','0.0032 N\u00b7s','125 N\u00b7s'],a:0,
+   why:'J = F\u0394t = 250 \u00d7 0.8 = 200 N\u00b7s.'},
+  {q:'An airbag increases stopping time from 0.02 s to 0.15 s. What happens to the average force?',
+   opts:['Increases 7.5\u00d7','Decreases 7.5\u00d7','Stays the same','Becomes zero'],a:1,
+   why:'F = \u0394p/\u0394t. Same \u0394p, \u0394t is 7.5\u00d7 larger \u2192 force is 7.5\u00d7 smaller.'},
+  {q:'A 2 kg ball changes velocity from +5 m/s to \u22123 m/s. What is the magnitude of \u0394p?',
+   opts:['4 kg\u00b7m/s','16 kg\u00b7m/s','2 kg\u00b7m/s','10 kg\u00b7m/s'],a:1,
+   why:'|\u0394p| = m|vf\u2212vi| = 2\u00d7|\u22123\u22125| = 2\u00d78 = 16 kg\u00b7m/s.'},
+  {q:'In a perfectly inelastic collision:',
+   opts:['Both p and KE are conserved','p is conserved; KE is not','KE is conserved; p is not','Neither is conserved'],a:1,
+   why:'Momentum is always conserved. KE is lost to heat/deformation.'},
+  {q:'In an isolated collision, which quantity is always conserved?',
+   opts:["Each object's momentum",'Total momentum','Kinetic energy','Speed of each object'],a:1,
+   why:'Total momentum of the system is conserved, not individual momenta.'},
+  {q:'A 5 kg cart at 4 m/s collides elastically with an identical 5 kg cart at rest. What happens?',
+   opts:['Both move at 2 m/s','Cart A stops; Cart B moves at 4 m/s','Both stop','Cart A reverses'],a:1,
+   why:'Equal masses in an elastic collision: the moving cart stops and the other moves off at 4 m/s.'},
+  {q:'A 90 kg astronaut pushes off a 600 kg spacecraft (both at rest). The astronaut moves at 1.5 m/s. What is the spacecraft speed?',
+   opts:['1.5 m/s','0.225 m/s','10 m/s','0.0 m/s'],a:1,
+   why:'0 = 90\u00d71.5 + 600\u00d7v \u2192 v = \u2212135/600 = 0.225 m/s.'}
+];
+let quizAnswered={};
+function buildQuiz(){
+  const box=$('quizBox');box.innerHTML='';
+  quiz.forEach((item,i)=>{
+    const div=document.createElement('div');div.className='question';
+    div.innerHTML='<span class="q-num">Question '+(i+1)+' of '+quiz.length+'</span><p>'+item.q+'</p>';
+    item.opts.forEach((op,j)=>{
+      const b=document.createElement('button');b.textContent=op;
+      b.onclick=()=>{if(quizAnswered[i])return;quizAnswered[i]=j===item.a?'c':'w';div.querySelectorAll('button').forEach(x=>x.disabled=true);b.classList.add(j===item.a?'correct':'wrong');showFb(i,j===item.a);};
+      div.appendChild(b);
+    });
+    const fb=document.createElement('div');fb.className='fb';fb.style.display='none';fb.id='qfb'+i;
+    div.appendChild(fb);box.appendChild(div);
+  });
+}
+function showFb(i,ok){
+  const fb=$('qfb'+i);fb.style.display='block';fb.className='fb '+(ok?'fg':'fr');
+  fb.textContent=(ok?'\u2713 Correct. ':'\u2717 Not quite. ')+quiz[i].why;
+}
+function showScore(){
+  let s=0;quiz.forEach((_,i)=>{if(quizAnswered[i]==='c')s++;});
+  $('scoreBig').textContent=s+'/'+quiz.length;
+  $('scoreSub').textContent=s>=8?'Excellent \u2014 strong grasp of momentum and impulse!':s>=6?'Good work \u2014 review the questions you missed.':'Keep practising \u2014 revisit the simulation tabs.';
+  $('scoreWrap').classList.add('show');$('scoreWrap').scrollIntoView({behavior:'smooth'});
+}
+function resetQuiz(){quizAnswered={};buildQuiz();$('scoreWrap').classList.remove('show');}
+
+/* ══ TABS ══ */
+const TABS=[
+  ['t-mom','Momentum Lab'],['t-imp','Impulse Graph Lab'],
+  ['t-air','Airbag Simulation'],['t-col','Collision Simulator'],
+  ['t-quiz','Quiz']
+];
+function redrawActive(){
+  const id=(document.querySelector('.panel.active')||{}).id;
+  if(id==='t-mom')drawMom();
+  else if(id==='t-imp')drawImp();
+  else if(id==='t-air')drawAir();
+  else if(id==='t-col')collReset();
+}
+function initTabs(){
+  const box=$('tabs');
+  TABS.forEach(([id,name],i)=>{
+    const b=document.createElement('button');
+    b.className='tab-btn'+(i===0?' active':'');
+    b.textContent=name;
+    b.onclick=()=>{
+      document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+      $(id).classList.add('active');
+      document.querySelectorAll('.tab-btn').forEach(x=>x.classList.remove('active'));
+      b.classList.add('active');
+      if(collAnim){cancelAnimationFrame(collAnim);collAnim=null;$('c-go').disabled=false;}
+      setTimeout(redrawActive,30);
+    };
+    box.appendChild(b);
+  });
+}
+['mm','mv','i-f','i-t','a-m','a-vi','a-t','c-m1','c-v1','c-m2','c-v2']
+  .forEach(id=>{const el=$(id);if(el)el.addEventListener('input',()=>{const a=(document.querySelector('.panel.active')||{}).id;if(a==='t-col')collReset();else redrawActive();});});
+['i-shape']
+  .forEach(id=>{const el=$(id);if(el)el.addEventListener('change',redrawActive);});
+$('c-type').addEventListener('change',collReset);
+
+window.addEventListener('resize',()=>setTimeout(redrawActive,60));
+initTabs();buildQuiz();
+setTimeout(()=>{drawMom();},120);
+</script>
+</body>
+</html>
